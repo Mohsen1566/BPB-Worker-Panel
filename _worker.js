@@ -17,6 +17,8 @@ let proxyIP = proxyIPs[Math.floor(Math.random() * proxyIPs.length)];
 
 let dohURL = 'https://cloudflare-dns.com/dns-query';
 
+let panelVersion = '2.3.2';
+
 if (!isValidUUID(userID)) {
     throw new Error('uuid is not valid');
 }
@@ -1006,7 +1008,7 @@ const getFragmentConfigs = async (env, hostName, client) => {
 
         let fragConfig = structuredClone(xrayConfigTemp);
         let outbound = structuredClone(xrayOutboundTemp);
-        let remark = `💦 BPB - ${addr}`;
+        let remark = `💦 BPB Frag - ${addr}`;
         delete outbound.mux;
         delete outbound.streamSettings.grpcSettings;
         delete outbound.streamSettings.realitySettings;
@@ -1131,6 +1133,7 @@ const getSingboxConfig = async (env, hostName) => {
         let outbound = structuredClone(singboxOutboundTemp);
         outbound.server = addr;
         outbound.tag = addr;
+        outbound.uuid = userID;
         outbound.tls.server_name = randomUpperCase(hostName);
         outbound.transport.headers.Host = randomUpperCase(hostName);
         outbound.transport.path += getRandomPath(16);
@@ -1509,7 +1512,7 @@ const renderHomePage = async (env, hostName, fragConfigs) => {
 	</head>
 	
 	<body>
-		<h1 style="text-align: center; color: #2980b9">BPB Panel <span style="font-size: smaller;">2.3</span> 💦</h1>
+		<h1 style="text-align: center; color: #2980b9">BPB Panel <span style="font-size: smaller;">${panelVersion}</span> 💦</h1>
 		<div class="form-container">
             <h2>FRAGMENT SETTINGS ⚙️</h2>
 			<form id="configForm">
@@ -1798,7 +1801,7 @@ const renderHomePage = async (env, hostName, fragConfigs) => {
             const intervalMax = getValue('fragmentIntervalMax');
             const cleanIP = document.getElementById('cleanIPs');
             const cleanIPs = cleanIP.value?.split(',');
-            const chainProxy = document.getElementById('outProxy').value;                    
+            const chainProxy = document.getElementById('outProxy').value?.trim();                    
             const formData = new FormData(configForm);
             const isVless = /vless:\\/\\/[^\s@]+@[^\\s:]+:[^\\s]+/.test(chainProxy);
             const hasSecurity = /security=/.test(chainProxy);
@@ -2011,7 +2014,7 @@ const renderLoginPage = async () => {
     </head>
     <body>
         <div class="container">
-            <h1>BPB Panel <span style="font-size: smaller;">2.3</span> 💦</h1>
+            <h1>BPB Panel <span style="font-size: smaller;">${panelVersion}</span> 💦</h1>
             <div class="form-container">
                 <h2>User Login</h2>
                 <form id="loginForm">
@@ -2318,13 +2321,8 @@ const singboxConfigTemp = {
             {
                 outbound: "direct",
                 server: "dns-direct"
-            },
-            {
-                outbound: "any",
-                server: "dns-direct"
             }
         ],
-        strategy: "ipv4_only",
         independent_cache: true
     },
     inbounds: [
@@ -2361,11 +2359,11 @@ const singboxConfigTemp = {
         {
             type: "selector",
             tag: "proxy",
-            outbounds: ["URL-TEST"]
+            outbounds: ["Best-Ping"]
         },
         {
             type: "urltest",
-            tag: "URL-TEST",
+            tag: "Best-Ping",
             outbounds: [],
             url: "https://www.gstatic.com/generate_204",
             interval: "3m",
@@ -2503,7 +2501,7 @@ const singboxOutboundTemp = {
     type: "vless",
     server: "",
     server_port: 443,
-    uuid: userID,
+    uuid: "",
     domain_strategy: "prefer_ipv6",
     packet_encoding: "",
     tls: {
@@ -2561,7 +2559,7 @@ const errorPage = `
 
     <body>
         <div id="error-container">
-            <h1>BPB Panel <span style="font-size: smaller;">2.3</span> 💦</h1>
+            <h1>BPB Panel <span style="font-size: smaller;">${panelVersion}</span> 💦</h1>
             <div id="error-message">
                 <h2>KV Dataset is not properly set! Please refer to <a href="https://github.com/bia-pain-bache/BPB-Worker-Panel/blob/main/README.md">documents</a></h2>
             </div>
